@@ -1,0 +1,145 @@
+// This is your Prisma schema file,
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                     Int       @id @default(autoincrement())
+  name                   String
+  email                  String    @unique
+  phoneNumber            String
+  password               String
+  role                   String    // "ADMIN", "AGENT", "USER"
+  balance                Float     @default(0.0)
+  tokens                 Int       @default(0)
+  location               String?  
+  status                 String    @default("PENDING") // "PENDING", "ACTIVE", "INACTIVE"
+  verificationCode       String?   // Nullable, stores user verification code
+  verificationCodeExpiresAt DateTime?  // Expiration time for verification code
+  depositPaid            Boolean   @default(false)  // Tracks if the deposit has been paid
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  Agent                  Agent?
+  Rental                 Rental[]
+  Payment                Payment[]
+  Transaction            Transaction[]
+}
+
+model Agent {
+  id              Int      @id @default(autoincrement())
+  userId          Int      @unique
+  user            User     @relation(fields: [userId], references: [id])
+  level           AgentLevel
+  address         String?
+  nationId        Int      // Nation or country identifier
+  debt            Float    @default(0.0)
+  negativeBalance Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  assets          Asset[]
+  payments        Payment[]
+  transactions    Transaction[] @relation("AgentTransactions") 
+}
+
+model Asset {
+  id              Int      @id @default(autoincrement())
+  name            String
+  assetType       AssetType
+  qrCode          String   @unique
+  agentId         Int
+  agent           Agent    @relation(fields: [agentId], references: [id])
+  rented          Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt  
+
+  Rental          Rental[]
+  Transaction     Transaction[]
+}
+
+model Rental {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  user            User     @relation(fields: [userId], references: [id])
+  assetId         Int
+  asset           Asset    @relation(fields: [assetId], references: [id])
+  tokens          Int      @default(0)
+  rentalDate      DateTime @default(now())
+  returnDate      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Payment {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  user            User     @relation(fields: [userId], references: [id])
+  agentId         Int
+  agent           Agent    @relation(fields: [agentId], references: [id])
+  amount          Float
+  method          PaymentMethod
+  proofOfPayment  String?
+  status          PaymentStatus @default(PENDING)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Transaction {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  user            User     @relation(fields: [userId], references: [id])
+  agentId         Int
+  agent           Agent    @relation("AgentTransactions", fields: [agentId], references: [id]) 
+  assetId         Int
+  asset           Asset    @relation(fields: [assetId], references: [id])
+  transactionType TransactionType
+  amount          Float?
+  tokenAmount     Int?
+  transactionDate DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  AGENT
+  USER
+}
+
+enum AgentLevel {
+  BASIC
+  STANDARD
+  MAX
+}
+
+enum AssetType {
+  POWERBANK
+  FREEZER
+  LAMP
+  FRIDGE
+}
+
+enum PaymentMethod {
+  ECOCASH
+  INNBUCKS
+  CASH
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum TransactionType {
+  RENT
+  RETURN
+}

@@ -1,0 +1,19 @@
+{
+  "moduleFileExtensions": [
+    "js",
+    "json",
+    "ts"
+  ],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "common/common/(.*)": "<rootDir>/../libs/common/src/$1",
+    "common/common": "<rootDir>/../libs/common/src",
+    "common/prisma/(.*)": "<rootDir>/../libs/prisma/src/$1",
+    "common/prisma": "<rootDir>/../libs/prisma/src"
+  }
+}
