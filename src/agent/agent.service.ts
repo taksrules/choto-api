@@ -1,26 +1,34 @@
-import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateAgentDto } from './dto/create-agent.dto';
 import { UpdateAgentDto } from './dto/update-agent.dto';
 import { RegisterAgentDto } from './dto/register-agent';
 import { PrismaService } from 'common/prisma';
 import { VerifyUserDto } from './dto/very-user.dto';
+import { DistributeTokensDto } from './dto/distribute-tokens.dto';
+import { Prisma, TransactionType } from '@prisma/client';
 
 @Injectable()
 export class AgentService {
-
   constructor(private readonly prisma: PrismaService) {}
   create(createAgentDto: CreateAgentDto) {
     return 'This action adds a new agent';
   }
 
   async registerAgent(registerAgentDto: RegisterAgentDto) {
-   
-    const user = await this.prisma.user.findUnique({ where: { id: registerAgentDto.userId } });
+    const user = await this.prisma.user.findUnique({
+      where: { id: registerAgentDto.userId },
+    });
     if (!user) {
-      throw new NotFoundException(`User with ID ${registerAgentDto.userId} not found`);
+      throw new NotFoundException(
+        `User with ID ${registerAgentDto.userId} not found`,
+      );
     }
 
-    
     const existingAgent = await this.prisma.agent.findUnique({
       where: { userId: registerAgentDto.userId },
     });
@@ -28,7 +36,6 @@ export class AgentService {
       throw new ConflictException('User is already registered as an agent');
     }
 
-    
     const agent = await this.prisma.agent.create({
       data: {
         userId: registerAgentDto.userId,
@@ -38,7 +45,7 @@ export class AgentService {
         negativeBalance: false,
         createdAt: new Date(),
         updatedAt: new Date(),
-      },
+      } as Prisma.AgentUncheckedCreateInput,
     });
 
     // Logic to notify the admin for approval can be added here (e.g., email, system notification)
@@ -51,12 +58,11 @@ export class AgentService {
     const agent = await this.prisma.agent.findUnique({
       where: { id: agentId },
       include: {
-        assets: true,  // Include assets assigned to the agent
-        payments: true // Optionally include payments (if needed)
-      }
+        assets: true, // Include assets assigned to the agent
+        payments: true, // Optionally include payments (if needed)
+      },
     });
 
-    
     if (!agent) {
       throw new NotFoundException(`Agent with ID ${agentId} not found`);
     }
@@ -69,14 +75,14 @@ export class AgentService {
       address: agent.address,
       debt: agent.debt,
       negativeBalance: agent.negativeBalance,
-      assets: agent.assets.map(asset => ({
+      assets: agent.assets.map((asset) => ({
         id: asset.id,
         name: asset.name,
         assetType: asset.assetType,
         qrCode: asset.qrCode,
-        rented: asset.rented
+        rented: asset.rented,
       })),
-      payments: agent.payments // Optionally include payment history
+      payments: agent.payments, // Optionally include payment history
     };
   }
 
@@ -89,7 +95,6 @@ export class AgentService {
   }
 
   async updateAgentProfile(agentId: number, updateAgentDto: UpdateAgentDto) {
-    // Fetch the agent and ensure it exists
     const agent = await this.prisma.agent.findUnique({
       where: { id: agentId },
     });
@@ -121,7 +126,7 @@ export class AgentService {
     return {
       balance: agent.negativeBalance ? 0 : agent.debt, // Balance is 0 if they have a negative balance
       debt: agent.debt,
-      negativeBalance: agent.negativeBalance
+      negativeBalance: agent.negativeBalance,
     };
   }
 
@@ -140,7 +145,7 @@ export class AgentService {
     });
 
     // Return payment history
-    return payments.map(payment => ({
+    return payments.map((payment) => ({
       id: payment.id,
       amount: payment.amount,
       method: payment.method,
@@ -158,7 +163,9 @@ export class AgentService {
 
     // If user does not exist, throw an exception
     if (!user) {
-      throw new NotFoundException(`User with email ${verifyUserDto.email} not found`);
+      throw new NotFoundException(
+        `User with email ${verifyUserDto.email} not found`,
+      );
     }
 
     // Check if the user is in PENDING status
@@ -207,7 +214,7 @@ export class AgentService {
     });
 
     // Return transaction history
-    return transactions.map(transaction => ({
+    return transactions.map((transaction) => ({
       id: transaction.id,
       transactionType: transaction.transactionType,
       amount: transaction.amount,
@@ -222,7 +229,7 @@ export class AgentService {
     // Fetch agent and user by their email from the database
     const agent = await this.prisma.agent.findUnique({
       where: { id: agentId },
-      include: { user: true }
+      include: { user: true },
     });
     const user = await this.prisma.user.findUnique({ where: { email } });
 
@@ -236,7 +243,9 @@ export class AgentService {
 
     // Check if the agent has enough tokens to distribute
     if (agent.user.tokens < tokens) {
-      throw new ConflictException('Agent does not have enough tokens to distribute');
+      throw new ConflictException(
+        'Agent does not have enough tokens to distribute',
+      );
     }
 
     // Deduct tokens from the agent's balance
@@ -251,15 +260,14 @@ export class AgentService {
       data: { tokens: user.tokens + tokens },
     });
 
-    // Record the transaction in the Transaction table
     await this.prisma.transaction.create({
       data: {
-        agentId,
+        agentId: agentId,
         userId: user.id,
-        transactionType: 'DISTRIBUTION',
+        transactionType: TransactionType.RENT,
         tokenAmount: tokens,
         transactionDate: new Date(),
-      },
+      } as Prisma.TransactionUncheckedCreateInput, // Explicitly tell Prisma to use UncheckedCreateInput
     });
 
     return {

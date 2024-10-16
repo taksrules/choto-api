@@ -90,6 +90,6 @@ export class AuthController {
   @Get('profile')
   @UseGuards(JwtAuthGuard) // Ensure the user is authenticated
   async getProfile(@CurrentUser() user: User) {
-    return this.authService.getProfile(user.id); // Pass the user's ID to the service
+    return this.authService.getUserById(user.id); // Pass the user's ID to the service
   }
 }

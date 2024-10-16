@@ -160,11 +160,14 @@ export class AuthService {
 
     // Check if phoneNumber is being updated and is unique
     if (updateAuthDto.phoneNumber && updateAuthDto.phoneNumber !== user.phoneNumber) {
-      const existingPhoneNumberUser = await this.prisma.user.findUnique({ where: { phoneNumber: updateAuthDto.phoneNumber } });
+      const existingPhoneNumberUser = await this.prisma.user.findFirst({ 
+        where: { phoneNumber: updateAuthDto.phoneNumber } 
+      });
       if (existingPhoneNumberUser) {
         throw new ConflictException('Phone number is already in use');
       }
     }
+    
 
     // If password is being updated, hash it
     if (updateAuthDto.password) {
@@ -222,10 +225,32 @@ export class AuthService {
     const transactions = await this.prisma.transaction.findMany({
       where: { userId },
       include: {
-        agent: true,  // Include agent details (optional)
-        asset: true   // Include asset details (optional)
-      }
+        agent: {
+          include: {
+            user: true,  // Include the related user for the agent
+          },
+        },
+        asset: true,    // Include asset details (optional)
+      },
     });
+    
+    // Return the transaction history with key details
+    return transactions.map(transaction => ({
+      transactionId: transaction.id,
+      transactionType: transaction.transactionType,
+      amount: transaction.amount,
+      tokenAmount: transaction.tokenAmount,
+      transactionDate: transaction.transactionDate,
+      asset: transaction.asset ? {
+        name: transaction.asset.name,
+        assetType: transaction.asset.assetType,
+      } : null,
+      agent: transaction.agent ? {
+        name: transaction.agent.user.name,  // Now we can safely access agent's user details
+        email: transaction.agent.user.email,
+      } : null,
+    }));
+    
 
     // Return the transaction history with key details
     return transactions.map(transaction => ({

@@ -4,6 +4,7 @@ import { UpdateAdminDto } from './dto/update-admin.dto';
 import { PrismaService } from 'common/prisma';
 import { ApproveAgentDto } from './dto/approve-agent.dto';
 import { AssignRoleDto, Role } from './dto/role-assignment.dto';
+import { Prisma, TransactionType } from '@prisma/client';
 
 interface PaginationParams {
   page: number;
@@ -64,13 +65,14 @@ export class AdminService {
     // Record the token allocation as a transaction
     await this.prisma.transaction.create({
       data: {
-        agentId: agentId,
-        userId: agent.userId,
-        transactionType: 'TOKEN_ALLOCATION',
+        agentId: agentId,            // Directly assign the agentId
+        userId: agent.userId,        // Directly assign the userId
+        transactionType: TransactionType.RENT,
         tokenAmount: initialTokens,
         transactionDate: new Date(),
-      },
+      } as Prisma.TransactionUncheckedCreateInput,  // Explicitly use UncheckedCreateInput
     });
+    
 
     return {
       message: `Agent with ID ${agentId} has been approved and allocated ${initialTokens} tokens.`,
@@ -86,7 +88,7 @@ export class AdminService {
     // Fetch total count of users
     const totalUsers = await this.prisma.user.count();
 
-    // Fetch paginated users
+    
     const users = await this.prisma.user.findMany({
       skip: offset,
       take: limit,
