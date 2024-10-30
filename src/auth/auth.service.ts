@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { UpdateAuthDto } from './dto/update-user.dto';
 import { PrismaService } from 'common/prisma';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
@@ -24,6 +24,7 @@ export class AuthService {
         tokens: 0,
         password: await bcrypt.hash(createAuthDto.password, 10),
         balance: 0,
+        role:'USER',
         status: 'PENDING', 
         verificationCode: verificationCode, 
       }
@@ -215,22 +216,22 @@ export class AuthService {
   }
 
   async getUserTransactions(userId: number) {
-    // Ensure the user exists
+   
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
-    // Fetch all transactions related to the user
+    
     const transactions = await this.prisma.transaction.findMany({
       where: { userId },
       include: {
         agent: {
           include: {
-            user: true,  // Include the related user for the agent
+            user: true,  
           },
         },
-        asset: true,    // Include asset details (optional)
+        asset: true,    
       },
     });
     

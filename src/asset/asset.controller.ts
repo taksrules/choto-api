@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
 import { AssetService } from './asset.service';
 import { CreateAssetDto } from './dto/create-asset.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
@@ -16,7 +16,17 @@ export class AssetController {
   @ApiOperation({ summary: 'Register a new asset in the system' })
   @UseGuards(JwtAuthGuard) // Ensure the agent or admin is authenticated
   async registerAsset(@Body() registerAssetDto: RegisterAssetDto) {
-    return this.assetService.registerAsset(registerAssetDto);
+    try {
+      return await this.assetService.registerAsset(registerAssetDto);
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: 'Failed to register asset. Please try again.',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Patch(':id/status')
@@ -24,7 +34,17 @@ export class AssetController {
   @ApiParam({ name: 'id', description: 'Asset ID' })
   @UseGuards(JwtAuthGuard) // Ensure the request is authenticated
   async updateAssetStatus(@Param('id') id: number, @Body() updateAssetStatusDto: UpdateAssetStatusDto) {
-    return this.assetService.updateAssetStatus(id, updateAssetStatusDto);
+    try {
+      return await this.assetService.updateAssetStatus(id, updateAssetStatusDto);
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: 'Failed to update asset status. Please try again.',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Get(':id/assets')
@@ -32,7 +52,17 @@ export class AssetController {
   @ApiParam({ name: 'id', description: 'Agent ID' })
   @UseGuards(JwtAuthGuard) // Ensure the request is authenticated
   async getAgentAssets(@Param('id') agentId: number) {
-    return this.assetService.getAgentAssets(agentId);
+    try {
+      return await this.assetService.getAgentAssets(agentId);
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: 'Failed to retrieve agent assets. Please try again.',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Get(':id')
@@ -40,7 +70,34 @@ export class AssetController {
   @ApiParam({ name: 'id', description: 'Asset ID' })
   @UseGuards(JwtAuthGuard) // Ensure the request is authenticated
   async getAssetDetails(@Param('id') id: number) {
-    return this.assetService.getAssetDetails(id);
+    try {
+      return await this.assetService.getAssetDetails(id);
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: 'Failed to retrieve asset details. Please try again.',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
+  @Get(':qrCode')
+  @ApiOperation({ summary: 'Retrieve asset details by QR code' })
+  @ApiParam({ name: 'qrCode', description: 'Asset QR Code' })
+  @UseGuards(JwtAuthGuard) // Ensure the request is authenticated
+  async verifyAsset(@Param('qrCode') qrCode: string) {
+    try {
+      return await this.assetService.verifyAsset(qrCode);
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: 'Failed to verify asset. Please try again.',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

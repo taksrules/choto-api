@@ -119,4 +119,22 @@ export class PaymentsService {
       transactionDate: transaction.transactionDate,
     };
   }
+
+  async getUserPayments(userId: number) {
+    // Check if the user exists
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    // Fetch payments related to the user
+    return await this.prisma.payment.findMany({
+      where: { userId },
+      include: {
+        agent: {
+          select: { id: true, user: { select: { name: true, email: true } } },
+        },
+      },
+    });
+  }
 }

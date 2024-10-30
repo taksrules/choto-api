@@ -9,6 +9,7 @@ import { AgentModule } from './agent/agent.module';
 import { AssetModule } from './asset/asset.module';
 import { RentalsModule } from './rentals/rentals.module';
 import { PaymentsModule } from './payments/payments.module';
+import { BoreholeModule } from './borehole/borehole.module';
 import * as Joi from 'joi';
 
 @Module({
@@ -27,6 +28,7 @@ import * as Joi from 'joi';
   AssetModule,
   RentalsModule,
   PaymentsModule,
+  BoreholeModule,
 ],
   controllers: [AppController],
   providers: [AppService],
