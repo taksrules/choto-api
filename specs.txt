@@ -1,0 +1,98 @@
+Choto App Specs
+Moto (Powerbank Rental) ( Same as LightBox -
+lamp rental)
+User Actions
+1. User Registration
+- User signs up and assigned acc confirmation code to give agent on paying reg fee.
+- Pay Reg fee : initial wallet load (e.g $6)
+- Wallet assigns tokens
+- Wallet hold float tokens (e.g$5) these cannot be used to borrow until 90 day period
+- If float is withdrawn User can’t rent powerbank (it prevents losses from PB non
+return
+- Wallet indicates token available for rental ($1)
+2. Rent Powerbank
+-Scan QR Code on powerbank or enter PB Number
+- PB assigned to User
+- System deducts tokens equivalent to PB borrowed
+- System cannot assign PB to user already holding another PB
+3. Return PB
+- Agent scans PB
+- System assigns PB from User to Agent
+Agent Actions
+1. Register User
+- Receive reg fee cash
+- Enter user confirmation code and approve reg
+2. Rent powerbank
+- User scans PB
+- System Assigns PB from Agent to User
+- System deducts Agent Walllet balance( float) equivalent to size of rented PB
+3. Return PB
+- Agent scans PB
+-System assigns PB to Agent from User
+4. Agent Registration
+- Agent signs up gets account confirmation code
+- Agent pays for hardware and sub fee(float/wallet balance)
+( Choto admin enters confirmation code and activates agent account)
+5. Agent Dashboard Features
+- Top up wallet
+- Confirm User registration
+- Scan to return
+- PB inventory List (In stock & Rented out) with PB numbers and User names
+Admin Actions
+- Register/Deregister Agent
+- View Agent Wallet
+- View User list
+- View PB list & allocation & location(town)
+- Register/Deregister User
+- Other I might have overlooked
+Freezer Hub
+User Actions
+1. Lot booking
+- User opens freezer page views calender with lots
+- Available lots are Green, Booked lots are Red
+- User clicks green lot and calender opens
+- They click days they want to book
+- Total appears below and click pay (Cash/paynow)
+- When they click cash the app display a purchase code ( XXXXX)
+- They give agent Purchase code and cash and the booking is confirmed
+- System will send notifications every 24 hrs then there is 3 days left in their booking.
+Agent Actions
+- Price setting (Agent sets price corresponding to day rental e.g $0.10/day
+- Agent side Has same lots as User side
+- Clicking a red lot shows details of user who has booked the lot
+- There is a button to send an instant reminder
+- When payment is made in cash the agent enters the purchase code from user tom
+confirm booking and the lot turns red
+- Upon expiry of booking period a screen to confirm if lot is empty appears for Agent
+to confirm , if not the lot enters an over due phase where it send a reminder every 2
+hours with warning their package will be removed within 24hrs if booking is not
+extended by payment.
+Amanzi
+User Actions.
+1. Water Purchase
+- User enters desired litres
+- system displays associated cost
+- user selects payment as cash
+- Purchase code appears
+- they give agent purchase code
+- Agent give them agent code
+- they enter agent code into app
+- System generated water tokens corresponding to 10 litre volumes
+Agent Actions
+1. Water purchase
+- Agent enters purchase code from user
+- He is given agent code
+- system deducts from wallet amount equal to transaction cost
+2. Agent price setting
+- Agent sets water price in $ per litre
+Unified Admin functions
+Admin
+- Has wallet where they load agent accounts system currency (tokens) equal to
+transactions performed on systems
+- all agent accounts are preloaded before gaining access
+- payment can be cash or integrated with paynow but for now leave paynow endpoint
+open
+- view agents by location
+- view users by location
+- view users by frequency of use
+- view agents by amount spent

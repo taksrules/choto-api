@@ -18,6 +18,7 @@ export class AuthService {
 
   async create(createAuthDto: CreateAuthDto) {
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString(); 
+    console.log(verificationCode)
     const user = await this.prisma.user.create({
       data: {  
         ...createAuthDto,
@@ -36,39 +37,41 @@ export class AuthService {
   }
 
   async login(
-    user:User,
-    response:Response
-  ){  
-    const expiresAccessToken= new Date()
-    expiresAccessToken.setMilliseconds(
-      expiresAccessToken.getTime()+ parseInt(
-        this.configService.getOrThrow<string>(
-          'JWT_ACCESS_TOKEN_EPIRATION_MS'
-        )
-      )
-    );
-    const tokenPayload:TokenPayload={
-      userId:user.id.toString()
-    };
-    const accessToken =this.jwtService.sign(
-      tokenPayload,
-      {
-        secret:this.configService.getOrThrow<string>(
-          'JWT_ACCESS_TOKEN_SECRET'
-        ),
-        expiresIn: `${
-          this.configService.getOrThrow<string>(
-            'JWT_ACCESS_TOKEN_EPIRATION_MS'
-          )
-        }ms`
-      }
-    )
-    response.cookie('Authentication', accessToken,{
-      httpOnly:true,
-      secure: this.configService.get('NODE_ENV')==='production',
-      expires:expiresAccessToken
-    })
+    user: User,
+    response: Response
+  ) {
     
+    if (user.status !== 'ACTIVE') {
+        throw new UnauthorizedException('User is not verified');
+    }
+
+    const expiresAccessToken = new Date();
+    expiresAccessToken.setMilliseconds(
+        expiresAccessToken.getTime() + parseInt(
+            this.configService.getOrThrow<string>(
+                'JWT_ACCESS_TOKEN_EPIRATION_MS'
+            )
+        )
+    );
+    const tokenPayload: TokenPayload = {
+        userId: user.id.toString()
+    };
+    const accessToken = this.jwtService.sign(
+        tokenPayload,
+        {
+            secret: this.configService.getOrThrow<string>(
+                'JWT_ACCESS_TOKEN_SECRET'
+            ),
+            expiresIn: `${this.configService.getOrThrow<string>(
+                'JWT_ACCESS_TOKEN_EPIRATION_MS'
+            )}ms`
+        }
+    );
+    response.cookie('Authentication', accessToken, {
+        httpOnly: true,
+        secure: this.configService.get('NODE_ENV') === 'production',
+        expires: expiresAccessToken
+    });
   }
 
   async verifyUser(email:string, password:string){

@@ -1,73 +1,143 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Choto API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A NestJS-based REST API for managing asset rentals, agent operations, and borehole water distribution.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- **Authentication**
+  - User registration and login with JWT
+  - Role-based access control (Admin, Agent, User)
+  - User verification system
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Asset Management**
+  - Asset registration and tracking
+  - QR code-based asset verification
+  - Rental history tracking
+  - Asset status management
+
+- **Agent Operations**
+  - Agent registration and approval system
+  - Token distribution
+  - Balance and debt tracking
+  - Asset assignment
+
+- **Borehole Water System**
+  - Three-step verification process:
+    1. Purchase code generation
+    2. Agent code verification
+    3. Token code generation
+  - Water quantity tracking
+  - Payment integration
+
+- **Rental System**
+  - Asset rental management
+  - Token-based payment system
+  - Rental history tracking
+  - Return processing
+
+- **Payment Processing**
+  - Multiple payment methods (Ecocash, Innbucks, Cash)
+  - Payment verification
+  - Transaction history
+  - Balance management
+
+## Prerequisites
+
+- Node.js (v14 or higher)
+- PostgreSQL
+- npm or yarn
 
 ## Installation
 
-```bash
-$ npm install
-```
-
-## Running the app
+1. Clone the repository:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+git clone <repository-url>
+cd choto-api
 ```
 
-## Test
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Set up environment variables:
+Create a `.env` file in the root directory with the following variables:
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/choto_db"
+JWT_ACCESS_TOKEN_SECRET="your-secret-key"
+JWT_ACCESS_TOKEN_EPIRATION_MS="3600000"
+PORT=3000
+```
+
+4. Run database migrations:
+```bash
+npx prisma migrate dev
+```
+
+## Running the Application
 
 ```bash
-# unit tests
-$ npm run test
+# Development
+npm run start:dev
 
-# e2e tests
-$ npm run test:e2e
+# Production
+npm run start:prod
 
-# test coverage
-$ npm run test:cov
+# Debug mode
+npm run start:debug
 ```
 
-## Support
+## API Documentation
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+API documentation is available at `/api/docs` when running the application. It provides detailed information about all available endpoints, request/response formats, and authentication requirements.
 
-## Stay in touch
+## Testing
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```bash
+# Unit tests
+npm run test
+
+# E2E tests
+npm run test:e2e
+
+# Test coverage
+npm run test:cov
+```
+
+## Project Structure
+
+```
+src/
+├── admin/         # Admin-related functionality
+├── agent/         # Agent management
+├── asset/         # Asset management
+├── auth/          # Authentication and authorization
+├── borehole/      # Borehole water system
+├── payments/      # Payment processing
+├── rentals/       # Rental management
+└── users/         # User management
+```
+
+## Database Schema
+
+The application uses Prisma ORM with PostgreSQL. Key models include:
+- User
+- Agent
+- Asset
+- Rental
+- Payment
+- Transaction
+- Borehole-related models
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-Nest is [MIT licensed](LICENSE).
+This project is licensed under the MIT License - see the LICENSE file for details.
